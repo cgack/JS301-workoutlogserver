@@ -18,7 +18,11 @@ router.post('/', function(req, res) {
 		})
 		.then(
 			function createSuccess(log) {
+				var io = req.app.get('socketio');
+				var message = { log: log, username: req.user.username };
+				
 				res.json(log);
+				io.emit("new log", message);
 			},
 			function createError(err) {
 				res.send(500, err.message);
