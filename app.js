@@ -5,9 +5,15 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var bodyParser = require('body-parser');
 var sequelize = require('./db.js');
+var Feed = sequelize.import('./models/feed');
 
 io.on('connection', function(socket) {
-	console.log("yay it worked!");
+	socket.on("chat-message", function(msg) {
+		Feed.create(msg)
+			.then(function(data) {
+				io.emit("chat-message", msg);
+			});
+	});
 });
 
 app.set("socketio", io);
@@ -28,6 +34,8 @@ app.use('/api/login', require('./routes/session'));
 app.use('/api/definition', require('./routes/definition'));
 // log route
 app.use('/api/log', require('./routes/log'));
+//feed route
+app.use('/api/feed', require('./routes/feed'));
 
 // Test route for api http://localhost:3000/api/test
 app.use('/api/test', function(req, res) {
